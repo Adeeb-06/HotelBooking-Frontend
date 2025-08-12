@@ -1,9 +1,24 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Link from 'next/link';
+import { AppContent } from '../context/AppContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const SideBar = () => {
+   const { setIsLoggedIn } = useContext(AppContent);
   const [activeLink, setActiveLink] = useState('dashboard');
+
+  const logout = async () => {
+    try {
+      await axios.post('/api/hotel/logout-hotel', {withCredentials: true});
+      setIsLoggedIn(false);
+      toast.success('Logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error.response?.data || error.message);
+      toast.error('Failed to logout');
+    }
+  };
 
   const navItems = [
     {
@@ -105,7 +120,7 @@ const SideBar = () => {
             </svg>
             Settings
           </button>
-          <button className="flex-1 flex items-center justify-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
+          <button onClick={() => logout()} className="flex-1 flex items-center justify-center px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>

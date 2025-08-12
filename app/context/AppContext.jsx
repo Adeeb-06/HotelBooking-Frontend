@@ -16,7 +16,7 @@ export const AppContextProvider = (props) => {
     const isHotelOwner = async () => {
         try {
             console.log('Checking hotel owner status...');
-            const response = await axios.get(`${backendUrl}/api/hotel/is-hotel-owner`, {withCredentials: true});
+            const response = await axios.get('/api/hotel/is-hotel-owner', {withCredentials: true});
             console.log('API Response:', response.data);
             
             if (response.data.success) {
@@ -35,10 +35,7 @@ export const AppContextProvider = (props) => {
     };
 
     // Check auth on app load
-    useEffect(() => {
-        isHotelOwner();
-    }, []);
-
+ 
     const value = {
         backendUrl,
         isLoggedIn,
