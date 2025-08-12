@@ -49,7 +49,7 @@ const handleSubmit = async () => {
     );
 
     if (response.status === 201) {
-      router.push('/login');
+      router.push('/dashboard-hotel-owner')
     }
   } catch (error) {
     console.log(error);
