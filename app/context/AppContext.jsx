@@ -12,12 +12,12 @@ export const AppContextProvider = (props) => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(null);
+    const [rooms, setRooms] = useState([])
 
     const isHotelOwner = async () => {
         try {
             console.log('Checking hotel owner status...');
             const response = await axios.get('/api/hotel/is-hotel-owner', {withCredentials: true});
-            console.log('API Response:', response.data);
             
             if (response.data.success) {
                 setIsLoggedIn(true);
@@ -34,6 +34,25 @@ export const AppContextProvider = (props) => {
         }
     };
 
+    const getRooms = async () => {
+        try {
+            const response = await axios.get('/api/room/get-rooms', {withCredentials: true});
+            
+            if (response.data.success) {
+                setRooms(response.data.rooms);
+            } else {
+                setRooms([]);
+                toast.error(response.data.message || "Failed to fetch rooms");
+            }
+        } catch (error) {
+            console.error("Fetch rooms error:", error.response?.data || error.message);
+            setRooms([]);
+            if (error.response?.status !== 401) {
+                toast.error("Failed to fetch rooms");
+            }
+        }
+    };
+
     // Check auth on app load
  
     const value = {
@@ -42,7 +61,9 @@ export const AppContextProvider = (props) => {
         setIsLoggedIn,
         userData,
         setUserData,
-        isHotelOwner
+        isHotelOwner,
+        rooms,
+        getRooms
     };
 
     return (

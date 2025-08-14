@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 const CreateRoomForm = () => {
 
-    const router = useRouter();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -121,7 +121,7 @@ const CreateRoomForm = () => {
     const res = await axios.post(
       'http://localhost:8000/api/room/create-room',
       formDataToSend,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { headers: { 'Content-Type': 'multipart/form-data' } },{withCredentials: true}
     );
     router.push('/dashboard-hotel-owner/');
   } catch (err) {

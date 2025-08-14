@@ -1,7 +1,27 @@
-import React from 'react'
+"use client";
+import React, { useContext, useEffect, useState } from 'react'
 import SideBar from '../components/SideBar'
+import { useRouter } from 'next/navigation';
+import { AppContent } from '../context/AppContext';
 
 const layout = (props) => {
+  const router = useRouter();
+  const { isLoggedIn, isHotelOwner } = useContext(AppContent);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      await isHotelOwner();  // this sets isLoggedIn
+      setCheckingAuth(false);
+    };
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!checkingAuth && !isLoggedIn) {
+      router.push('/login');  // redirect if NOT logged in
+    }
+  }, [checkingAuth, isLoggedIn]);
   return (
     <div className='flex h-screen'>
       {/* Fixed Sidebar */}
