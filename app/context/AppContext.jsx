@@ -36,7 +36,7 @@ export const AppContextProvider = (props) => {
 
     const getRooms = async () => {
         try {
-            const response = await axios.get('/api/room/get-rooms', {withCredentials: true});
+            const response = await axios.get('http://localhost:8000/api/room/get-rooms', {withCredentials: true});
             
             if (response.data.success) {
                 setRooms(response.data.rooms);

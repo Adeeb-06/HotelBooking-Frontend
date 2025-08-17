@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+"use client"
+import React, { useContext, useEffect, useState } from 'react';
 import { Calendar, Users, MapPin, CreditCard, CheckCircle } from 'lucide-react';
+import axios from 'axios';
+import { AppContent } from '../context/AppContext';
+import { useRouter } from 'next/navigation';
 
 const CreateBooking = () => {
+  const router = useRouter();
+  const { getRooms, rooms } = useContext(AppContent);
   const [formData, setFormData] = useState({
     roomIds: [],
     guestName: '',
@@ -11,16 +17,10 @@ const CreateBooking = () => {
     totalPrice: 0
   });
 
-  // Sample rooms data
-  const availableRooms = [
-    { id: '64a1b2c3d4e5f6789012345a', name: 'Deluxe Ocean View', price: 250, capacity: 2, image: '🏖️' },
-    { id: '64a1b2c3d4e5f6789012345b', name: 'Executive Suite', price: 450, capacity: 4, image: '🏢' },
-    { id: '64a1b2c3d4e5f6789012345c', name: 'Standard Room', price: 150, capacity: 2, image: '🛏️' },
-    { id: '64a1b2c3d4e5f6789012345d', name: 'Presidential Suite', price: 800, capacity: 6, image: '👑' },
-    { id: '64a1b2c3d4e5f6789012345e', name: 'Garden View Room', price: 180, capacity: 2, image: '🌿' },
-    { id: '64a1b2c3d4e5f6789012345f', name: 'Penthouse', price: 1200, capacity: 8, image: '🏙️' }
-  ];
+  const [errorMsg, setErrorMsg] = useState("")
 
+
+  const [availableRooms, setAvailableRooms] = useState([])
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -31,28 +31,59 @@ const CreateBooking = () => {
 
   const handleRoomSelection = (roomId) => {
     setFormData(prev => {
-      const isSelected = prev.roomIds.includes(roomId);
-      const newRoomIds = isSelected 
-        ? prev.roomIds.filter(id => id !== roomId)
-        : [...prev.roomIds, roomId];
-      
-      // Calculate total price
-      const totalPrice = newRoomIds.reduce((total, id) => {
-        const room = availableRooms.find(r => r.id === id);
-        return total + (room ? room.price : 0);
+      // update roomIds first
+      const updatedRoomIds = prev.roomIds.includes(roomId)
+        ? prev.roomIds.filter(id => id !== roomId) // remove if already selected
+        : [...prev.roomIds, roomId]; // add if not selected
+
+      const nights = prev.startDate && prev.endDate
+        ? Math.ceil((new Date(prev.endDate) - new Date(prev.startDate)) / (1000 * 60 * 60 * 24))
+        : 1;
+
+      // recalculate total price
+      const calculatedTotalPrice = updatedRoomIds.reduce((acc, id) => {
+        const room = availableRooms.find(room => room._id === id);
+        return acc + (room ? room.pricePerNight * nights : 0);
       }, 0);
 
+      // update state with both new roomIds and new totalPrice
       return {
         ...prev,
-        roomIds: newRoomIds,
-        totalPrice
+        roomIds: updatedRoomIds,
+        totalPrice: calculatedTotalPrice,
+        nights
       };
     });
   };
 
-  const handleSubmit = () => {
-    console.log('Booking Form Data:', formData);
-    alert('Booking form submitted! Check console for data.');
+
+  useEffect(() => {
+    getRooms();
+  }, []);
+
+  useEffect(() => {
+    setAvailableRooms(rooms);
+  }, [rooms]);
+
+
+
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post('http://localhost:8000/api/booking/create-booking', formData, { withCredentials: true });
+      if (res.data.success) {
+        router.push('/dashboard-hotel-owner/');
+      }
+ 
+    } catch (error) {
+       if (error.response && error.response.status === 409) {
+      // conflict from backend
+      setErrorMsg(error.response.data.message);
+    } else {
+      setErrorMsg("Something went wrong. Please try again.");
+    }
+    // console.error("Booking error:", error);
+    }
+ 
   };
 
   return (
@@ -72,7 +103,7 @@ const CreateBooking = () => {
                 <Users className="mr-3 text-blue-600" />
                 Guest Information
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -112,7 +143,7 @@ const CreateBooking = () => {
                 <Calendar className="mr-3 text-blue-600" />
                 Stay Dates
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -150,31 +181,29 @@ const CreateBooking = () => {
                 <MapPin className="mr-3 text-blue-600" />
                 Select Rooms
               </h2>
-              
+
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {availableRooms.map((room) => (
                   <div
-                    key={room.id}
-                    onClick={() => handleRoomSelection(room.id)}
-                    className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
-                      formData.roomIds.includes(room.id)
+                    key={room._id}
+                    onClick={() => handleRoomSelection(room._id)}
+                    className={`relative p-6 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${formData.roomIds.includes(room.id)
                         ? 'border-blue-500 bg-blue-50 shadow-lg scale-105'
                         : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
-                    }`}
+                      }`}
                   >
-                    {formData.roomIds.includes(room.id) && (
+                    {formData.roomIds.includes(room._id) && (
                       <CheckCircle className="absolute top-3 right-3 text-blue-600 w-6 h-6" />
                     )}
-                    
+
                     <div className="text-4xl mb-3">{room.image}</div>
                     <h3 className="font-semibold text-gray-800 mb-2">{room.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">Up to {room.capacity} guests</p>
-                    <p className="text-2xl font-bold text-blue-600">${room.price}</p>
+                    <p className="text-2xl font-bold text-blue-600">${room.pricePerNight}</p>
                     <p className="text-xs text-gray-500">per night</p>
                   </div>
                 ))}
               </div>
-              
+
               {formData.roomIds.length > 0 && (
                 <div className="mt-4 p-4 bg-green-50 rounded-xl">
                   <p className="text-green-800 font-medium">
@@ -196,9 +225,18 @@ const CreateBooking = () => {
                 </div>
               </div>
               <p className="text-sm text-gray-600 mt-2">
-                {formData.roomIds.length > 0 ? 'Per night for selected rooms' : 'Select rooms to see price'}
+                {formData.roomIds.length > 0 ? (
+                  formData.startDate && formData.endDate ? (
+                    `Total for ${formData.guests} guest(s) × ${Math.ceil(
+                      (new Date(formData.endDate) - new Date(formData.startDate)) / (1000 * 60 * 60 * 24)
+                    )} night(s)`
+                  ) : 'Select stay dates to see total price'
+                ) : 'Select rooms to see price'}
               </p>
+
             </div>
+
+            {errorMsg && <p className="text-red-500 text-xl mt-5 mb-5">{errorMsg}</p>}
 
             {/* Submit Button */}
             <button
