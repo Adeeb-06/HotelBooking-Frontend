@@ -14,12 +14,13 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(null);
     const [rooms, setRooms] = useState([])
     const [bookingsData, setBookingsData] = useState([])
+    const [bookingData, setBookingData] = useState([])
 
     const isHotelOwner = async () => {
         try {
             console.log('Checking hotel owner status...');
-            const response = await axios.get('/api/hotel/is-hotel-owner', {withCredentials: true});
-            
+            const response = await axios.get('/api/hotel/is-hotel-owner', { withCredentials: true });
+
             if (response.data.success) {
                 setIsLoggedIn(true);
             } else {
@@ -37,8 +38,8 @@ export const AppContextProvider = (props) => {
 
     const getRooms = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/room/get-rooms', {withCredentials: true});
-            
+            const response = await axios.get('http://localhost:8000/api/room/get-rooms', { withCredentials: true });
+
             if (response.data.success) {
                 setRooms(response.data.rooms);
             } else {
@@ -56,8 +57,8 @@ export const AppContextProvider = (props) => {
 
     const getBookings = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/api/booking/get-bookings', {withCredentials: true});
-            
+            const response = await axios.get('http://localhost:8000/api/booking/get-bookings', { withCredentials: true });
+
             if (response.data.success) {
                 setBookingsData(response.data.bookings);
             } else {
@@ -73,8 +74,25 @@ export const AppContextProvider = (props) => {
         }
     };
 
+    const getBookingsDetails = async (bookingId) => {
+        try {
+            const response = await axios.get(`http://localhost:8000/api/booking/get-booking-by-id/${bookingId}`, { withCredentials: true });
+            if (response.data.success) {
+                const booking = response.data.booking; // singular
+                setBookingData(booking);
+                return booking;
+            } else {
+                setBookingData([]);
+                toast.error(response.data.message || "Failed to fetch bookings");
+            }
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    };
+
     // Check auth on app load
- 
+
     const value = {
         backendUrl,
         isLoggedIn,
@@ -85,7 +103,9 @@ export const AppContextProvider = (props) => {
         rooms,
         getRooms,
         bookingsData,
-        getBookings
+        getBookings,
+        bookingData,
+        getBookingsDetails
     };
 
     return (

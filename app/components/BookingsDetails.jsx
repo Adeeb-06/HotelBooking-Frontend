@@ -1,17 +1,8 @@
 "use client"
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-
-const getBookingsDetails = async (bookingId) => {
-    try {
-        const response = await axios.get(`http://localhost:8000/api/booking/get-booking-by-id/${bookingId}`, {withCredentials: true});
-        const data = response.data.booking;
-        return data;
-    } catch (error) {
-        console.log(error);
-        return null;
-    }
-};
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContent } from '../context/AppContext';
+import Link from 'next/link';
 
 const getRooms = async (bookingId) => {
     try {
@@ -25,6 +16,7 @@ const getRooms = async (bookingId) => {
 };
 
 const BookingsDetails = ({bookingId, onBack}) => {
+    const { getBookingsDetails , bookingData } = useContext(AppContent);
     const [bookingsDetails, setBookingsDetails] = useState(null);
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,12 +28,11 @@ const BookingsDetails = ({bookingId, onBack}) => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const [details, roomsData] = await Promise.all([
-                    getBookingsDetails(bookingId),
-                    getRooms(bookingId)
-                ]);
+                const details = await getBookingsDetails(bookingId);
+                const roomsData = await getRooms(bookingId);
+            
                 
-                setBookingsDetails(details);
+                setBookingsDetails(bookingData);
                 setRooms(roomsData || []);
                 
                 if (!details) {
@@ -189,12 +180,15 @@ const BookingsDetails = ({bookingId, onBack}) => {
                             <div className="w-2 h-2 rounded-full bg-current mr-2"></div>
                             {bookingStatus.status}
                         </span>
+                        <Link href={`/dashboard-hotel-owner/bookings-table/update/${bookingId}`}>
+                        
                         <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             <span>Edit Booking</span>
                         </button>
+                        </Link>
                     </div>
                 </div>
 

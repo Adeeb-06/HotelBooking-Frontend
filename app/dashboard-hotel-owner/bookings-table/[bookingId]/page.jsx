@@ -2,7 +2,7 @@ import BookingsDetails from '@/app/components/BookingsDetails'
 import React from 'react'
 
 
-const BookingDetails = async ({params}) => {
+const BookingDetailsPage = async ({params}) => {
  const {bookingId} = await params
  console.log('bookingId' , bookingId)
 
@@ -13,4 +13,4 @@ const BookingDetails = async ({params}) => {
   )
 }
 
-export default BookingDetails
+export default BookingDetailsPage
