@@ -13,6 +13,7 @@ export const AppContextProvider = (props) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userData, setUserData] = useState(null);
     const [rooms, setRooms] = useState([])
+    const [bookingsData, setBookingsData] = useState([])
 
     const isHotelOwner = async () => {
         try {
@@ -53,6 +54,25 @@ export const AppContextProvider = (props) => {
         }
     };
 
+    const getBookings = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/booking/get-bookings', {withCredentials: true});
+            
+            if (response.data.success) {
+                setBookingsData(response.data.bookings);
+            } else {
+                setBookingsData([]);
+                toast.error(response.data.message || "Failed to fetch bookings");
+            }
+        } catch (error) {
+            console.error("Fetch bookings error:", error.response?.data || error.message);
+            setBookingsData([]);
+            if (error.response?.status !== 401) {
+                toast.error("Failed to fetch bookings");
+            }
+        }
+    };
+
     // Check auth on app load
  
     const value = {
@@ -63,7 +83,9 @@ export const AppContextProvider = (props) => {
         setUserData,
         isHotelOwner,
         rooms,
-        getRooms
+        getRooms,
+        bookingsData,
+        getBookings
     };
 
     return (
