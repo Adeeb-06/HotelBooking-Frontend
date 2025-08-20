@@ -32,7 +32,7 @@ const BookingsDetails = ({bookingId, onBack}) => {
                 const roomsData = await getRooms(bookingId);
             
                 
-                setBookingsDetails(bookingData);
+                setBookingsDetails(details);
                 setRooms(roomsData || []);
                 
                 if (!details) {
@@ -370,7 +370,7 @@ const BookingsDetails = ({bookingId, onBack}) => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                {/* <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
                     <div className="flex flex-wrap gap-4 justify-center">
                         <button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-xl transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center space-x-2">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -397,7 +397,7 @@ const BookingsDetails = ({bookingId, onBack}) => {
                             <span>Cancel Booking</span>
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

@@ -14,7 +14,7 @@ export const AppContextProvider = (props) => {
     const [userData, setUserData] = useState(null);
     const [rooms, setRooms] = useState([])
     const [bookingsData, setBookingsData] = useState([])
-    const [bookingData, setBookingData] = useState([])
+    const [bookingData, setBookingData] = useState(null)
 
     const isHotelOwner = async () => {
         try {
